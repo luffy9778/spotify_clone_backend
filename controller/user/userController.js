@@ -6,11 +6,21 @@ const getUser = async (req, res) => {
   if (!username) {
     return res.status(400).json({ message: " username is required" });
   }
-  const user = await User.findOne({ username }).populate("likedSongs").populate("artists").populate("playlist");
+  const user = await User.findOne({ username })
+    .select("-password")
+    .populate("artists")
+    .populate("playlist")
+    .populate({
+      path: "likedSongs",
+      populate: {
+        path: "artistname",
+        model: "Artist",
+      },
+    });
   if (!user) {
     return res.status(404).json({ message: "no user found" });
   }
-//   console.log(user);
+  //   console.log(user);
   res.json(user);
 };
-module.exports={getUser}
+module.exports = { getUser };
