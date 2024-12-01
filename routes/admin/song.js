@@ -7,10 +7,14 @@ const {
   getSongById,
 } = require("../../controller/admin/songController");
 const upload = require("../../middleware/multer");
+const verifyJwt = require("../../middleware/verifyJwt");
+const verifyRoles = require("../../middleware/verifyRoles");
 const router = express.Router();
 
 router.post(
   "/upload",
+  verifyJwt,
+  verifyRoles("Admin"),
   upload.fields([
     { name: "song", maxCount: 1 },
     { name: "image", maxCount: 1 },
@@ -19,14 +23,16 @@ router.post(
 );
 router.put(
   "/edit/:id",
+  verifyJwt,
+  verifyRoles("Admin"),
   upload.fields([
     { name: "song", maxCount: 1 },
     { name: "image", maxCount: 1 },
   ]),
   updateSong
 );
-router.delete("/:id", deleteSong);
-router.get("/", getAllSongs);
-router.get("/:id", getSongById);
+router.delete("/:id", verifyJwt, verifyRoles("Admin"), deleteSong);
+router.get("/", verifyJwt, verifyRoles("Admin", "User"), getAllSongs);
+router.get("/:id", verifyJwt, verifyRoles("Admin", "User"), getSongById);
 
 module.exports = router;
