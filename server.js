@@ -17,6 +17,7 @@ app.use(cookieparser())
 app.use("/auth", require("./routes/auth"))
 app.use("/likedsongs",require("./routes/user/likedSongs"))
 app.use("/user",require("./routes/user/user"))
+app.use("/search",require("./routes/user/search"))
 
 app.use("/songs",require("./routes/admin/song"))
 app.use("/playlist",require("./routes/admin/playlist"))

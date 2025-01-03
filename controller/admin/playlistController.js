@@ -48,6 +48,7 @@ const createPlaylist = async (req, res) => {
       playlisttags,
       songs,
       playlistimage: imageResult.secure_url,
+      playlistimage_publicId: imageResult.public_id,
     });
     await newPlaylist.save();
 
