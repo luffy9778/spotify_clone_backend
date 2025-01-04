@@ -23,6 +23,7 @@ app.use("/songs",require("./routes/admin/song"))
 app.use("/playlist",require("./routes/admin/playlist"))
 app.use("/artist",require("./routes/admin/artist"))
 app.use("/tags",require("./routes/admin/tags"))
+app.use("/info",require("./routes/admin/getInfo"))
 
 app.use("*",(req,res)=>{
     if(req.accepts("html")){

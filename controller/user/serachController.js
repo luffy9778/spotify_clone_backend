@@ -5,9 +5,6 @@ const Playlist = require("../../models/Playlist")
 const search=async(req,res)=>{
     try {
         const query=req.query.q
-        console.log(req.query)
-        console.log(req.query.q)
-        console.log(query)
     if(!query){
         return res.status(400).json({message:"Please enter a search query"})
     }
