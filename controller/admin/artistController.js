@@ -10,9 +10,7 @@ const createArtist = async (req, res) => {
     return res.status(400).json({ message: "Please fill all the fields" });
   }
   if (!req.file) {
-    return res
-      .status(400)
-      .json({ error: "Please add an image " });
+    return res.status(400).json({ error: "Please add an image " });
   }
 
   try {
@@ -118,13 +116,26 @@ const updateArtist = async (req, res) => {
   }
 };
 
-const getallArtist = async (_, res) => {
+const getallArtist = async (req, res) => {
   try {
-    const artists = await Artist.find().populate("composedsongs")
+    const { page = 1, limit = 5 } = req.query;
+    const artists = await Artist.find()
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .populate("composedsongs");
     if (!artists) {
       return res.status(404).json({ message: "No artists found" });
     }
-    res.status(200).json({ artists });
+    const totalArtists = await Artist.countDocuments();
+
+    res
+      .status(200)
+      .json({
+        artists,
+        totalArtists,
+        totalPages: Math.ceil(totalArtists / limit),
+        currentPage: Number(page),
+      });
   } catch (error) {
     console.error("Error fetching artists:", error);
     res.status(500).json({ message: "Error fetching artists" });
@@ -134,10 +145,13 @@ const getallArtist = async (_, res) => {
 const getArtistById = async (req, res) => {
   try {
     const artistId = req.params.id;
-    const artist = await Artist.findById(artistId).populate({path:"composedsongs",populate:{
-      path: 'artistname',    
-        model: 'Artist'
-    }})
+    const artist = await Artist.findById(artistId).populate({
+      path: "composedsongs",
+      populate: {
+        path: "artistname",
+        model: "Artist",
+      },
+    });
     if (!artist) {
       return res.status(404).json({ message: "Artist not found" });
     }
@@ -156,10 +170,12 @@ const deleteArtist = async (req, res) => {
       return res.status(404).json({ message: "Artist not found" });
     }
 
-/*/////////////////--------------------------------///////////////////*/
+    /*/////////////////--------------------------------///////////////////*/
 
-    if(artist.composedsongs.length){
-      return res.status(400).json({ message: "Artist has songs, cannot delete" });
+    if (artist.composedsongs.length) {
+      return res
+        .status(400)
+        .json({ message: "Artist has songs, cannot delete" });
     }
     const deleteResult = await cloudinary.uploader.destroy(
       artist.artistimage_publicId
@@ -172,7 +188,7 @@ const deleteArtist = async (req, res) => {
     //   {$pull:{}}
     // )
     res.status(200).json({ message: "Artist deleted successfully" });
-  } catch (error) { 
+  } catch (error) {
     console.error("Error deleting artist:", error);
     res.status(500).json({ message: "Error deleting artist" });
   }

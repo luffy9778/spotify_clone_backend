@@ -19,9 +19,9 @@ const addNewSong = async (req, res) => {
         .json({ message: "Please upload a song and image." });
     }
 
-    const artist = await Artist.findOne({artistname});
-    if(!artist){
-        return res.status(400).json({ message: "Artist not found." });
+    const artist = await Artist.findOne({ artistname });
+    if (!artist) {
+      return res.status(400).json({ message: "Artist not found." });
     }
 
     const songFile = req.files["song"][0];
@@ -65,7 +65,7 @@ const addNewSong = async (req, res) => {
     const newSong = new Song({
       songname,
       songtags,
-      artistname:artist._id,
+      artistname: artist._id,
       songimage_url: imageResult.secure_url,
       songimage_publicId: imageResult.public_id,
       songfile_url: songResult.secure_url,
@@ -74,8 +74,8 @@ const addNewSong = async (req, res) => {
     });
     await newSong.save();
 
-    artist.composedsongs.push(newSong._id)
-    await artist.save()
+    artist.composedsongs.push(newSong._id);
+    await artist.save();
 
     res.status(201).json({
       message: "Song added successfully",
@@ -183,10 +183,7 @@ const deleteSong = async (req, res) => {
       { _id: song.artistname },
       { $pull: { composedsongs: songId } }
     );
-    await Playlist.updateMany(
-      { songs: songId },
-      { $pull: { songs: songId } }
-    );
+    await Playlist.updateMany({ songs: songId }, { $pull: { songs: songId } });
 
     res.status(200).json({ message: "song deleted successfully" });
 
@@ -196,13 +193,26 @@ const deleteSong = async (req, res) => {
   }
 };
 
-const getAllSongs = async (_, res) => {
+const getAllSongs = async (req, res) => {
   try {
-    const songs = await Song.find().populate("artistname");
+    const { page = 1, limit = 5 } = req.query;
+
+    const songs = await Song.find()
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .populate("artistname");
     if (!songs) {
       return res.status(404).json({ message: "No songs found" });
     }
-    res.status(200).json({ songs });
+    const totalSongs = await Song.countDocuments();
+    res
+      .status(200)
+      .json({
+        songs,
+        totalSongs,
+        totalPages: Math.ceil(totalSongs / limit),
+        currentPage: Number(page),
+      });
   } catch (error) {
     res.status(500).json({ message: "Error fetching songs" });
     console.log(error);
