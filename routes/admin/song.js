@@ -5,6 +5,7 @@ const {
   deleteSong,
   getAllSongs,
   getSongById,
+  searchSong,
 } = require("../../controller/admin/songController");
 const upload = require("../../middleware/multer");
 const verifyJwt = require("../../middleware/verifyJwt");
@@ -32,7 +33,8 @@ router.put(
   updateSong
 );
 router.delete("/:id", verifyJwt, verifyRoles("Admin"), deleteSong);
-router.get("/", verifyJwt, verifyRoles("Admin", "User"), getAllSongs);
+router.get("/", verifyJwt, verifyRoles("Admin", "User"), getAllSongs); 
+router.get("/search", searchSong); 
 router.get("/:id", verifyJwt, verifyRoles("Admin", "User"), getSongById);
 
 module.exports = router;

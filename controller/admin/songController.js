@@ -205,14 +205,12 @@ const getAllSongs = async (req, res) => {
       return res.status(404).json({ message: "No songs found" });
     }
     const totalSongs = await Song.countDocuments();
-    res
-      .status(200)
-      .json({
-        songs,
-        totalSongs,
-        totalPages: Math.ceil(totalSongs / limit),
-        currentPage: Number(page),
-      });
+    res.status(200).json({
+      songs,
+      totalSongs,
+      totalPages: Math.ceil(totalSongs / limit),
+      currentPage: Number(page),
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching songs" });
     console.log(error);
@@ -233,10 +231,36 @@ const getSongById = async (req, res) => {
   }
 };
 
+const searchSong = async (req, res) => {
+  try {
+    const { page = 1, limit = 5, query } = req.query;
+    const songs = await Song.find({ songname: { $regex: query, $options: "i" } })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .populate("artistname");
+    if (!songs) {
+      return res.status(404).json({ message: "No songs found" });
+    }
+    const totalSongs = await Song.countDocuments({
+      songname: { $regex: query, $options: "i" },
+    });
+    res.status(200).json({
+      songs,
+      totalSongs,
+      totalPages: Math.ceil(totalSongs / limit),
+      currentPage: Number(page),
+    });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "Error fetching songs" });
+  }
+};
+
 module.exports = {
   addNewSong,
   updateSong,
   deleteSong,
   getAllSongs,
   getSongById,
+  searchSong
 };
