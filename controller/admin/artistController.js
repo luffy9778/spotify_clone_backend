@@ -128,14 +128,12 @@ const getallArtist = async (req, res) => {
     }
     const totalArtists = await Artist.countDocuments();
 
-    res
-      .status(200)
-      .json({
-        artists,
-        totalArtists,
-        totalPages: Math.ceil(totalArtists / limit),
-        currentPage: Number(page),
-      });
+    res.status(200).json({
+      artists,
+      totalArtists,
+      totalPages: Math.ceil(totalArtists / limit),
+      currentPage: Number(page),
+    });
   } catch (error) {
     console.error("Error fetching artists:", error);
     res.status(500).json({ message: "Error fetching artists" });
@@ -194,10 +192,37 @@ const deleteArtist = async (req, res) => {
   }
 };
 
+const searchArtist = async (req, res) => {
+  try {
+    const { page = 1, limit = 5, query } = req.query;
+    const artist = await Artist.find({
+      artistname: { $regex: query, $options: "i" },
+    })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+    if (!artist) {
+      return res.status(404).json({ message: "No artist found" });
+    }
+    const totalArtist = await Artist.countDocuments({
+      artistname: { $regex: query, $options: "i" },
+    });
+    res.status(200).json({
+      artists: artist,
+      totalArtist,
+      totalPages: Math.ceil(totalArtist / limit),
+      currentPage: Number(page),
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error fetching artist" });
+  }
+};
+
 module.exports = {
   createArtist,
   updateArtist,
   getallArtist,
   getArtistById,
   deleteArtist,
+  searchArtist,
 };

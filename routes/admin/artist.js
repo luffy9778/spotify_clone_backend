@@ -6,6 +6,7 @@ const {
   getallArtist,
   getArtistById,
   deleteArtist,
+  searchArtist,
 } = require("../../controller/admin/artistController");
 const verifyRoles = require("../../middleware/verifyRoles");
 const verifyJwt = require("../../middleware/verifyJwt");
@@ -20,6 +21,7 @@ router.put(
   updateArtist
 );
 router.get("/", verifyJwt, verifyRoles("Admin"), getallArtist);
+router.get("/search", verifyJwt, verifyRoles("Admin"), searchArtist);
 router.get("/:id", verifyJwt, verifyRoles("Admin", "User"), getArtistById);
 router.delete("/:id", deleteArtist);
 
