@@ -2,6 +2,7 @@ const cloudinary = require("../../config/cloudinary");
 const Artist = require("../../models/Artist");
 const Playlist = require("../../models/Playlist");
 const Song = require("../../models/Song");
+const Tags = require("../../models/Tags");
 
 const addNewSong = async (req, res) => {
   try {
@@ -22,6 +23,11 @@ const addNewSong = async (req, res) => {
     const artist = await Artist.findOne({ artistname });
     if (!artist) {
       return res.status(400).json({ message: "Artist not found." });
+    }
+
+    const tag = await Tags.findOne({tagName:songtags });
+    if (!tag) {
+      return res.status(400).json({ message: "tag not found." });
     }
 
     const songFile = req.files["song"][0];
@@ -64,7 +70,7 @@ const addNewSong = async (req, res) => {
 
     const newSong = new Song({
       songname,
-      songtags,
+      songtags:tag._id,
       artistname: artist._id,
       songimage_url: imageResult.secure_url,
       songimage_publicId: imageResult.public_id,
@@ -88,7 +94,7 @@ const addNewSong = async (req, res) => {
 };
 
 const updateSong = async (req, res) => {
-  const songId = req.params.songId;
+  const songId = req.params.id;
   const { songname, songtags, songbgcolour, artistname } = req.body;
   try {
     const song = await Song.findById(songId);
@@ -101,7 +107,10 @@ const updateSong = async (req, res) => {
       song.songname = songname;
     }
     if (songtags) {
-      song.songtags = songtags;
+      const tag = await Tags.findOne({tagName:songtags });
+    if (!tag) {
+      return res.status(400).json({ message: "tag not found." });
+    }
     }
     if (songbgcolour) {
       song.songbgcolour = songbgcolour;
@@ -133,6 +142,7 @@ const updateSong = async (req, res) => {
           )
           .end(songFile.buffer);
       });
+      song.songfile_url=songResult.secure_url
     }
 
     if (req.files && req.files["image"]) {
@@ -153,6 +163,7 @@ const updateSong = async (req, res) => {
           )
           .end(imageFile.buffer);
       });
+      song.songimage_url=imageResult.secure_url
     }
     song.save();
     res.status(200).json({ message: "Song updated successfully", song });
@@ -184,7 +195,7 @@ const deleteSong = async (req, res) => {
       { $pull: { composedsongs: songId } }
     );
     await Playlist.updateMany({ songs: songId }, { $pull: { songs: songId } });
-
+console.log("song deleted successfully")
     res.status(200).json({ message: "song deleted successfully" });
 
     /*/////////////// delte song from artist and playlist also///////////*/
@@ -220,7 +231,7 @@ const getAllSongs = async (req, res) => {
 const getSongById = async (req, res) => {
   try {
     const songId = req.params.id;
-    const song = await Song.findById(songId).populate("artistname");
+    const song = await Song.findById(songId).populate("artistname").populate("songtags");
     if (!song) {
       return res.status(404).json({ message: "Song not found" });
     }

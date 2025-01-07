@@ -4,10 +4,10 @@ const songSchema=new mongoose.Schema({
         type:String,
         required:true
     },
-    songtags:[{
+    songtags:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Tag"
-    }],
+    },
     songfile_url:{
         type:String,
         required:true
