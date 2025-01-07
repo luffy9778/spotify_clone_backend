@@ -23,4 +23,44 @@ const getUser = async (req, res) => {
   //   console.log(user);
   res.json(user);
 };
-module.exports = { getUser };
+
+//for socket.io
+const updateOnlineStatus = async (userId, isOnline, socketId = null) => {
+  try {
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      { isOnline, socketId },
+      { new: true }
+    );
+    return updateUser;
+  } catch (error) {
+    console.log(" Error updating user status", error);
+  }
+};
+
+const updateOnlineStatusBySocketId = async (socketId, isOnline) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { socketId },
+      { isOnline, $unset: { socketId: "" } },
+      { new: true }
+    );
+    return user;
+  } catch (error) {
+    console.log(" Error updating user status by soket id", error);
+  }
+};
+
+const getAllUsers = async () => {
+  try {
+    return await User.find({ roles: { $nin: ["Admin"] } });
+  } catch (error) {
+    console.log("Error fetching all users", error);
+  }
+};
+module.exports = {
+  getUser,
+  updateOnlineStatus,
+  updateOnlineStatusBySocketId,
+  getAllUsers,
+};
