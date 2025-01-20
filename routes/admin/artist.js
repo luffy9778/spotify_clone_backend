@@ -12,7 +12,7 @@ const verifyRoles = require("../../middleware/verifyRoles");
 const verifyJwt = require("../../middleware/verifyJwt");
 const router = express.Router();
 
-router.post("/add", verifyRoles("Admin"), upload.single("image"), createArtist);
+router.post("/add",verifyJwt,verifyRoles("Admin"), upload.single("image"), createArtist);
 router.put(
   "/edit/:id",
   verifyJwt,
@@ -22,7 +22,7 @@ router.put(
 );
 router.get("/", verifyJwt, verifyRoles("Admin"), getallArtist);
 router.get("/search", verifyJwt, verifyRoles("Admin"), searchArtist);
-router.get("/:id", verifyJwt, verifyRoles("Admin", "User"), getArtistById);
+router.get("/:id", verifyJwt, verifyRoles("Admin","User"), getArtistById);
 router.delete("/:id", deleteArtist);
 
 module.exports = router;

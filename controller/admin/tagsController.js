@@ -1,9 +1,10 @@
 const cloudinary = require("../../config/cloudinary");
 const Tags = require("../../models/Tags");
+const Song = require("../../models/Song");
 
 const addSerchTags = async (req, res) => {
-  const { tagName, tagColour } = req.body;
-  if (!tagName || !tagColour) {
+  const { tagName, tagBgcolour } = req.body;
+  if (!tagName || !tagBgcolour) {
     return res.status(400).json({ message: "Please fill in all fields." });
   }
   if (!req.file) {
@@ -34,7 +35,7 @@ const addSerchTags = async (req, res) => {
 
     const newTag = new Tags({
       tagName,
-      tagBgcolour: tagColour,
+      tagBgcolour,
       tagImage_url: imageResult.secure_url,
       tagImage_publicId: imageResult.public_id,
     });
@@ -56,4 +57,18 @@ const getAllTags = async (_, res) => {
   }
 };
 
-module.exports = { addSerchTags,getAllTags};
+const getTagById = async (req, res) => {
+  try {
+    const tag = await Tags.findById(req.params.id);
+    if (!tag) {
+      return res.status(404).json({ message: "Tag not found." });
+    }
+    const songs = await Song.find({ songtags: req.params.id }).populate("artistname");
+    res.status(200).json({tag,songs});
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+module.exports = { addSerchTags, getAllTags,getTagById };

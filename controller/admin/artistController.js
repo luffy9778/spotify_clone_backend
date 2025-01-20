@@ -82,7 +82,6 @@ const updateArtist = async (req, res) => {
     if (req.file) {
       const imageFile = req.file;
       const oldImage = artist.artistimage_publicId;
-      // imageFile.originalname=oldImage
       const imageResult = await new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream(
@@ -97,13 +96,7 @@ const updateArtist = async (req, res) => {
           )
           .end(imageFile.buffer);
       });
-      console.log("image uploaded");
-      console.log("old id", oldImage);
-      console.log("new id", imageResult.public_id);
-      console.log("old url", artist.artistimage_Url);
-      // console.log("new url",artist.imageResult.secure_url)
-      // artist.artistimage_Url=imageResult.secure_url
-      // artist.artistimage_publicId=imageResult.public_id
+      artist.artistimage_Url= imageResult.secure_url;
     }
 
     artist.save();
