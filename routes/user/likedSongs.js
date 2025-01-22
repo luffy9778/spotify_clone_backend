@@ -6,6 +6,6 @@ const router=express.Router()
 
 router.get("/",verifyJwt,verifyRoles("User"),getLikedsong)
 router.post("/",verifyJwt,verifyRoles("User"),addLikedSongs)
-router.delete("/",verifyJwt,verifyRoles("User"),removeLikedSongs)
+router.delete("/:songId",verifyJwt,verifyRoles("User"),removeLikedSongs)
 
 module.exports=router

@@ -23,34 +23,31 @@ const addLikedSongs = async (req, res) => {
       .status(400)
       .json({ message: "username and songId are required" });
   }
-  const song = await Song.findById(songId);
-  if (!song) {
-    return res.status(404).json({ message: "no song found" });
-  }
-  const user = await User.findOne({ username });
-  if (!user) {
-    return res.status(404).json({ message: "no user found" });
-  }
   try {
-    const result = await User.updateOne(
-      { username },
-      { $addToSet: { likedSongs: songId } }
-    );
-
-    if (result.modifiedCount > 0) {
-      return res.status(200).json({ message: "song added to liked songs" });
-    } else {
+    const song = await Song.findById(songId);
+    if (!song) {
+      return res.status(404).json({ message: "no song found" });
+    }
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: "no user found" });
+    }
+    if (user.likedSongs.includes(songId)) {
       return res.status(400).json({ message: "song already in liked songs" });
     }
+    user.likedSongs.push(songId);
+    await user.save();
+
+    return res.status(200).json({ message: "song added to liked songs" });
   } catch (error) {
-    console.error("Error adding song to liked songs:");
+    console.log("Error adding song to liked songs:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 const removeLikedSongs = async (req, res) => {
   const username = req.username;
-  const songId = req.body.songId;
+  const songId = req.params.songId;
   if (!songId) {
     return res.status(400).json({ message: "songId is required" });
   }
@@ -62,20 +59,13 @@ const removeLikedSongs = async (req, res) => {
     if (!user.likedSongs.includes(songId)) {
       return res.status(400).json({ message: "song not found in liked songs" });
     }
-
-    const result = await User.updateOne(
-      { username },
-      { $pull: { likedSongs: songId } }
-    );
-    if (result.modifiedCount > 0) {
-      return res.status(200).json({ message: "Song removed from liked songs" });
-    } else {
-      return res.status(400).json({ message: "Failed to remove song" });
-    }
+    user.likedSongs.pull(songId);
+    await user.save();
+    return res.status(200).json({ message: "Song removed from liked songs" });
   } catch (error) {
-    console.error("Error removing song from liked songs");
+    console.error("Error removing song from liked songs",error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-module.exports = { getLikedsong, addLikedSongs,removeLikedSongs };
+module.exports = { getLikedsong, addLikedSongs, removeLikedSongs };
