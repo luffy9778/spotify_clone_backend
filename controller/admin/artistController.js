@@ -29,7 +29,7 @@ const createArtist = async (req, res) => {
     const imageResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { resource_type: "image", public_id: `artist/${imageFileName}` },
+          { resource_type: "image", public_id:imageFileName,folder:`spotify/artists/${artistname}` },
           (err, result) => {
             if (err) {
               reject(err);

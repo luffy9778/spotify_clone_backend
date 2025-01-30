@@ -3,9 +3,9 @@ const Playlist = require("../../models/Playlist");
 const Song = require("../../models/Song");
 
 const createPlaylist = async (req, res) => {
-  const { palylistname, playlistbgcolour, playlisttags, songs } = req.body;
+  const { palylistname, playlistbgcolour, songs } = req.body;
 
-  if (!palylistname || !playlistbgcolour || !playlisttags || !songs) {
+  if (!palylistname || !playlistbgcolour  || !songs) {
     return res.status(400).json({ error: "Please fill all the fields" });
   }
 
@@ -30,7 +30,7 @@ const createPlaylist = async (req, res) => {
     const imageResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { resource_type: "image", public_id: `playlist/${imageFileName}` },
+          { resource_type: "image", public_id: imageFileName,folder:`spotify/playlists/${palylistname}` },
           (err, result) => {
             if (err) {
               reject(err);
@@ -45,7 +45,7 @@ const createPlaylist = async (req, res) => {
     const newPlaylist = new Playlist({
       palylistname,
       playlistbgcolour,
-      playlisttags,
+      // playlisttags,
       songs,
       playlistimage: imageResult.secure_url,
       playlistimage_publicId: imageResult.public_id,
@@ -65,7 +65,7 @@ const createPlaylist = async (req, res) => {
 
 const getAllPlaylist = async (_, res) => {
   try {
-    const playlists = await Playlist.find();
+    const playlists = await Playlist.find().populate("songs");
     if (!playlists) {
       return res.status(404).json({ message: "No playlists found" });
     }

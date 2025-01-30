@@ -7,10 +7,6 @@ const { parseBuffer } = require("music-metadata");
 
 const addNewSong = async (req, res) => {
   try {
-    // const { songname, songtags, bgcolour } = req.body;
-    // if (!songname || !songtags || !bgcolour) {
-    //   return res.status(400).json({ message: "Please fill all the fields." });
-    // }
     const { songname, songtags, artistname, bgcolour } = req.body;
     if (!songname || !songtags || !artistname || !bgcolour) {
       return res.status(400).json({ message: "Please fill all the fields." });
@@ -46,7 +42,7 @@ const addNewSong = async (req, res) => {
     const songResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { resource_type: "auto", public_id: `songs/${songFileName}` },
+          { resource_type: "auto", public_id:songFileName,folder:`spotify/songs/${songname}` },
           (error, result) => {
             if (error) {
               reject(error);
@@ -60,7 +56,7 @@ const addNewSong = async (req, res) => {
     const imageResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { resource_type: "image", public_id: `images/${imageFileName}` },
+          { resource_type: "image", public_id:imageFileName,folder:`spotify/songs/${songname}` },
           (error, result) => {
             if (error) {
               reject(error);

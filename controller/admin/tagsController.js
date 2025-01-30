@@ -24,7 +24,7 @@ const addSerchTags = async (req, res) => {
     const imageResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { resource_type: "image", public_id: `tags/${imageFileName}` },
+          { resource_type: "image", public_id:imageFileName,folder:`spotify/tags/${tagName}` },
           (error, result) => {
             if (error) reject(error);
             else resolve(result);

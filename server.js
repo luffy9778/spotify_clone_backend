@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const connectDB = require("./config/dbConnect");
 const cookieparser = require("cookie-parser");
 const corsOptions = require("./config/corsOptions");
-const PORT = 3500;
+const PORT =process.env.PORT|| 3500;
 
 // soket.io
 const { createServer } = require("node:http");
@@ -16,7 +16,8 @@ const { socketHandler } = require("./utils/socketHandler");
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    // origin: "http://localhost:3000",
+    origin: "react-project-spotify-clone.vercel.app",
     methods: ["GET", "POST"],
   },
 });
@@ -32,6 +33,7 @@ app.use("/auth", require("./routes/auth"));
 app.use("/likedsongs", require("./routes/user/likedSongs"));
 app.use("/user", require("./routes/user/user"));
 app.use("/search", require("./routes/user/search"));
+app.use("/visited", require("./routes/user/dummy"));
 
 app.use("/songs", require("./routes/admin/song"));
 app.use("/playlist", require("./routes/admin/playlist"));
