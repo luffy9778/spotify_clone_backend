@@ -17,7 +17,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     // origin: "http://localhost:3000",
-    origin: "react-project-spotify-clone.vercel.app",
+    origin: "https://react-project-spotify-clone.vercel.app",
     methods: ["GET", "POST"],
   },
 });
